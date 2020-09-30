@@ -80,7 +80,12 @@ export const VisibleChangesetSpecNode: React.FunctionComponent<VisibleChangesetS
                         )}
                     </h3>
                     <div className="mr-2">
-                        <Link to={node.description.baseRepository.url} target="_blank" rel="noopener noreferrer" className="d-block d-sm-inline">
+                        <Link
+                            to={node.description.baseRepository.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="d-block d-sm-inline"
+                        >
                             {node.description.baseRepository.name}
                         </Link>{' '}
                         {node.description.__typename === 'GitBranchChangesetDescription' && (
@@ -98,13 +103,18 @@ export const VisibleChangesetSpecNode: React.FunctionComponent<VisibleChangesetS
                 )}
             </div>
             {/* The button for expanding the information used on xs devices. */}
-            <button type="button"
+            <button
+                type="button"
                 aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
-                onClick={toggleIsExpanded} className="visible-changeset-spec-node__show-details btn btn-outline-secondary d-block d-sm-none test-campaigns-expand-changeset-spec">{isExpanded ? (
+                onClick={toggleIsExpanded}
+                className="visible-changeset-spec-node__show-details btn btn-outline-secondary d-block d-sm-none test-campaigns-expand-changeset-spec"
+            >
+                {isExpanded ? (
                     <ChevronDownIcon className="icon-inline" aria-label="Close section" />
                 ) : (
                     <ChevronRightIcon className="icon-inline" aria-label="Expand section" />
-                )} Show details
+                )}{' '}
+                {isExpanded ? 'Hide' : 'Show'} details
             </button>
             {isExpanded && (
                 <>
