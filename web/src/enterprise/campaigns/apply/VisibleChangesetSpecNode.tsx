@@ -89,10 +89,10 @@ export const VisibleChangesetSpecNode: React.FunctionComponent<VisibleChangesetS
                             {node.description.baseRepository.name}
                         </Link>{' '}
                         {node.description.__typename === 'GitBranchChangesetDescription' && (
-                            <>
+                            <div className="d-block d-sm-inline-block">
                                 <span className="badge badge-primary">{node.description.baseRef}</span> &larr;{' '}
                                 <span className="badge badge-primary">{node.description.headRef}</span>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

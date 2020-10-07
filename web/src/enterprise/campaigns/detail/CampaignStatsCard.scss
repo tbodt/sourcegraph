@@ -23,7 +23,7 @@
         min-width: 0;
         @include media-breakpoint-down(sm) {
             flex-basis: 33%;
-            padding-top: 0.5rem;
+            padding-top: 1rem;
             padding-left: 0.5rem;
             padding-right: 0.5rem;
         }
