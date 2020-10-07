@@ -21,9 +21,13 @@ import { subDays } from 'date-fns'
 import { useMemo, useCallback } from '@storybook/addons'
 import { EnterpriseWebStory } from '../../components/EnterpriseWebStory'
 
-const { add } = storiesOf('web/campaigns/details/CampaignDetailsPage', module).addDecorator(story => (
-    <div className="p-3 container web-content">{story()}</div>
-))
+const { add } = storiesOf('web/campaigns/details/CampaignDetailsPage', module)
+    .addDecorator(story => <div className="p-3 container web-content">{story()}</div>)
+    .addParameters({
+        chromatic: {
+            viewports: [320, 576, 978, 1440],
+        },
+    })
 
 const now = new Date()
 
