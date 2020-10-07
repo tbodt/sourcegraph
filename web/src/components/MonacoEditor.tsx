@@ -34,6 +34,7 @@ monaco.editor.defineTheme(SOURCEGRAPH_DARK, {
         { token: 'identifier', foreground: '#f2f4f8' },
         { token: 'keyword', foreground: '#569cd6' },
         { token: 'operator', foreground: '#da77f2' },
+        { token: 'comment', foreground: '#ffa94d' },
     ],
 })
 
@@ -53,12 +54,13 @@ monaco.editor.defineTheme(SOURCEGRAPH_LIGHT, {
         'list.hoverBackground': '#f2f4f8',
         'editorHoverWidget.background': '#ffffff',
         'editorHoverWidget.foreground': '#2b3750',
-        'editorHoverWidget.border': '#cad2e2',
+        'editorHoverWidget.border': '#4dabf7',
     },
     rules: [
         { token: 'identifier', foreground: '#2b3750' },
         { token: 'keyword', foreground: '#268bd2' },
         { token: 'operator', foreground: '#ae3ec9' },
+        { token: 'comment', foreground: '#d9480f' },
     ],
 })
 
