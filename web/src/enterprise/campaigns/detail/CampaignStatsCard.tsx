@@ -20,8 +20,9 @@ interface CampaignStatsCardProps {
 }
 
 export const CampaignStatsCard: React.FunctionComponent<CampaignStatsCardProps> = ({ stats, closedAt, className }) => {
-    const percentComplete = stats.total === 0 ? 0 : (((stats.closed + stats.merged) / stats.total) * 100).toFixed(0)
-    const isCompleted = stats.closed + stats.merged === stats.total
+    const percentComplete =
+        stats.total === 0 ? 0 : (((stats.closed + stats.merged + stats.deleted) / stats.total) * 100).toFixed(0)
+    const isCompleted = stats.closed + stats.merged + stats.deleted === stats.total
     let CampaignStatusIcon = ProgressCheckIcon
     if (isCompleted) {
         CampaignStatusIcon = CheckCircleOutlineIcon
