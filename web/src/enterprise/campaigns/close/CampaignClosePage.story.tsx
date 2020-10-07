@@ -35,10 +35,11 @@ const campaignDefaults: CampaignFields = {
     changesets: {
         stats: {
             closed: 1,
+            deleted: 1,
             merged: 2,
             open: 3,
             total: 10,
-            unpublished: 5,
+            unpublished: 4,
         },
     },
     createdAt: subDays(now, 5).toISOString(),
