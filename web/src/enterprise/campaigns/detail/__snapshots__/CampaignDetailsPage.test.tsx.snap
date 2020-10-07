@@ -220,7 +220,7 @@ exports[`CampaignDetailsPage viewerCanAdminister: false viewing existing 1`] = `
             <span
               className="lead text-nowrap campaign-stats-card__completeness"
             >
-              0
+              10
               % complete
             </span>
             <div
@@ -1159,7 +1159,7 @@ exports[`CampaignDetailsPage viewerCanAdminister: true viewing existing 1`] = `
             <span
               className="lead text-nowrap campaign-stats-card__completeness"
             >
-              0
+              10
               % complete
             </span>
             <div
