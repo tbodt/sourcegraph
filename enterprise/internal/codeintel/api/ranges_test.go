@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	commitmocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/commits/mocks"
 	gitservermocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/gitserver/mocks"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
@@ -20,23 +21,23 @@ func TestRanges(t *testing.T) {
 	mockGitserverClient := gitservermocks.NewMockClient()
 	mockCommitUpdater := commitmocks.NewMockUpdater()
 
-	sourceRanges := []bundles.CodeIntelligenceRange{
+	sourceRanges := []clienttypes.CodeIntelligenceRange{
 		{
-			Range:       bundles.Range{Start: bundles.Position{1, 2}, End: bundles.Position{3, 4}},
-			Definitions: []bundles.Location{},
-			References:  []bundles.Location{},
+			Range:       clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}},
+			Definitions: []clienttypes.Location{},
+			References:  []clienttypes.Location{},
 			HoverText:   "",
 		},
 		{
-			Range:       bundles.Range{Start: bundles.Position{2, 3}, End: bundles.Position{4, 5}},
-			Definitions: []bundles.Location{{Path: "foo.go", Range: bundles.Range{Start: bundles.Position{10, 20}, End: bundles.Position{30, 40}}}},
-			References:  []bundles.Location{{Path: "bar.go", Range: bundles.Range{Start: bundles.Position{100, 200}, End: bundles.Position{300, 400}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{2, 3}, End: clienttypes.Position{4, 5}},
+			Definitions: []clienttypes.Location{{Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{10, 20}, End: clienttypes.Position{30, 40}}}},
+			References:  []clienttypes.Location{{Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{100, 200}, End: clienttypes.Position{300, 400}}}},
 			HoverText:   "ht2",
 		},
 		{
-			Range:       bundles.Range{Start: bundles.Position{3, 4}, End: bundles.Position{5, 6}},
-			Definitions: []bundles.Location{{Path: "bar.go", Range: bundles.Range{Start: bundles.Position{11, 21}, End: bundles.Position{31, 41}}}},
-			References:  []bundles.Location{{Path: "foo.go", Range: bundles.Range{Start: bundles.Position{101, 201}, End: bundles.Position{301, 401}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{3, 4}, End: clienttypes.Position{5, 6}},
+			Definitions: []clienttypes.Location{{Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{11, 21}, End: clienttypes.Position{31, 41}}}},
+			References:  []clienttypes.Location{{Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{101, 201}, End: clienttypes.Position{301, 401}}}},
 			HoverText:   "ht3",
 		},
 	}
@@ -53,21 +54,21 @@ func TestRanges(t *testing.T) {
 
 	expectedRanges := []ResolvedCodeIntelligenceRange{
 		{
-			Range:       bundles.Range{Start: bundles.Position{1, 2}, End: bundles.Position{3, 4}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}},
 			Definitions: nil,
 			References:  nil,
 			HoverText:   "",
 		},
 		{
-			Range:       bundles.Range{Start: bundles.Position{2, 3}, End: bundles.Position{4, 5}},
-			Definitions: []ResolvedLocation{{Dump: testDump1, Path: "sub1/foo.go", Range: bundles.Range{Start: bundles.Position{10, 20}, End: bundles.Position{30, 40}}}},
-			References:  []ResolvedLocation{{Dump: testDump1, Path: "sub1/bar.go", Range: bundles.Range{Start: bundles.Position{100, 200}, End: bundles.Position{300, 400}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{2, 3}, End: clienttypes.Position{4, 5}},
+			Definitions: []ResolvedLocation{{Dump: testDump1, Path: "sub1/foo.go", Range: clienttypes.Range{Start: clienttypes.Position{10, 20}, End: clienttypes.Position{30, 40}}}},
+			References:  []ResolvedLocation{{Dump: testDump1, Path: "sub1/bar.go", Range: clienttypes.Range{Start: clienttypes.Position{100, 200}, End: clienttypes.Position{300, 400}}}},
 			HoverText:   "ht2",
 		},
 		{
-			Range:       bundles.Range{Start: bundles.Position{3, 4}, End: bundles.Position{5, 6}},
-			Definitions: []ResolvedLocation{{Dump: testDump1, Path: "sub1/bar.go", Range: bundles.Range{Start: bundles.Position{11, 21}, End: bundles.Position{31, 41}}}},
-			References:  []ResolvedLocation{{Dump: testDump1, Path: "sub1/foo.go", Range: bundles.Range{Start: bundles.Position{101, 201}, End: bundles.Position{301, 401}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{3, 4}, End: clienttypes.Position{5, 6}},
+			Definitions: []ResolvedLocation{{Dump: testDump1, Path: "sub1/bar.go", Range: clienttypes.Range{Start: clienttypes.Position{11, 21}, End: clienttypes.Position{31, 41}}}},
+			References:  []ResolvedLocation{{Dump: testDump1, Path: "sub1/foo.go", Range: clienttypes.Range{Start: clienttypes.Position{101, 201}, End: clienttypes.Position{301, 401}}}},
 			HoverText:   "ht3",
 		},
 	}

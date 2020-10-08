@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store/mocks"
@@ -21,7 +22,7 @@ func TestHandleSameDumpCursor(t *testing.T) {
 
 	setMockStoreGetDumpByID(t, mockStore, map[int]store.Dump{42: testDump1})
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient})
-	setMockBundleClientReferences(t, mockBundleClient, "main.go", 23, 34, []bundles.Location{
+	setMockBundleClientReferences(t, mockBundleClient, "main.go", 23, 34, []clienttypes.Location{
 		{DumpID: 42, Path: "foo.go", Range: testRange1},
 		{DumpID: 42, Path: "foo.go", Range: testRange2},
 		{DumpID: 42, Path: "foo.go", Range: testRange3},
@@ -48,7 +49,7 @@ func TestHandleSameDumpCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 0,
 		})
 		if err != nil {
@@ -72,7 +73,7 @@ func TestHandleSameDumpCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 5,
 		}
 		if !hasNewCursor {
@@ -89,7 +90,7 @@ func TestHandleSameDumpCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 5,
 		})
 		if err != nil {
@@ -112,7 +113,7 @@ func TestHandleSameDumpCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 0,
 		}
 		if !hasNewCursor {
@@ -130,7 +131,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 
 	setMockStoreGetDumpByID(t, mockStore, map[int]store.Dump{42: testDump1})
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient})
-	setMockBundleClientReferences(t, mockBundleClient, "main.go", 23, 34, []bundles.Location{
+	setMockBundleClientReferences(t, mockBundleClient, "main.go", 23, 34, []clienttypes.Location{
 		{DumpID: 42, Path: "foo.go", Range: testRange1},
 		{DumpID: 42, Path: "foo.go", Range: testRange2},
 		{DumpID: 42, Path: "foo.go", Range: testRange3},
@@ -145,7 +146,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 	}
 
 	t.Run("partial results", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "pad", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "pad", 0, 5, []clienttypes.Location{
 			{DumpID: 42, Path: "foo.go", Range: testRange1},
 			{DumpID: 42, Path: "foo.go", Range: testRange2},
 			{DumpID: 42, Path: "bar.go", Range: testRange2},
@@ -159,7 +160,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 0,
 		})
 		if err != nil {
@@ -181,7 +182,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 5,
 		}
 		if !hasNewCursor {
@@ -192,7 +193,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 	})
 
 	t.Run("end of result set", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "pad", 5, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "pad", 5, 5, []clienttypes.Location{
 			{DumpID: 42, Path: "baz.go", Range: testRange1},
 			{DumpID: 42, Path: "baz.go", Range: testRange2},
 		}, 7)
@@ -203,7 +204,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 			Path:        "main.go",
 			Line:        23,
 			Character:   34,
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 5,
 		})
 		if err != nil {
@@ -222,7 +223,7 @@ func TestHandleSameDumpMonikersCursor(t *testing.T) {
 			Phase:       "definition-monikers",
 			DumpID:      42,
 			Path:        "main.go",
-			Monikers:    []bundles.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "export", Scheme: "gomod", Identifier: "pad"}},
 			SkipResults: 0,
 		}
 		if !hasNewCursor {
@@ -253,7 +254,7 @@ func TestHandleDefinitionMonikersCursor(t *testing.T) {
 	}
 
 	t.Run("partial results", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "pad", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "pad", 0, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 			{DumpID: 50, Path: "baz.go", Range: testRange3},
@@ -265,7 +266,7 @@ func TestHandleDefinitionMonikersCursor(t *testing.T) {
 			Phase:       "definition-monikers",
 			DumpID:      42,
 			Path:        "main.go",
-			Monikers:    []bundles.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
 			SkipResults: 0,
 		})
 		if err != nil {
@@ -287,7 +288,7 @@ func TestHandleDefinitionMonikersCursor(t *testing.T) {
 			Phase:       "definition-monikers",
 			DumpID:      42,
 			Path:        "main.go",
-			Monikers:    []bundles.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
 			SkipResults: 5,
 		}
 		if !hasNewCursor {
@@ -298,7 +299,7 @@ func TestHandleDefinitionMonikersCursor(t *testing.T) {
 	})
 
 	t.Run("end of result set", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "pad", 5, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "pad", 5, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 			{DumpID: 50, Path: "baz.go", Range: testRange3},
@@ -310,7 +311,7 @@ func TestHandleDefinitionMonikersCursor(t *testing.T) {
 			Phase:       "definition-monikers",
 			DumpID:      42,
 			Path:        "main.go",
-			Monikers:    []bundles.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
+			Monikers:    []clienttypes.MonikerData{{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}},
 			SkipResults: 5,
 		})
 		if err != nil {
@@ -362,7 +363,7 @@ func TestHandleSameRepoCursor(t *testing.T) {
 	})
 
 	t.Run("partial results", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 			{DumpID: 51, Path: "baz.go", Range: testRange3},
@@ -423,15 +424,15 @@ func TestHandleSameRepoCursor(t *testing.T) {
 	})
 
 	t.Run("multiple pages", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 		}, 2)
-		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "bar", 0, 3, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "bar", 0, 3, []clienttypes.Location{
 			{DumpID: 51, Path: "baz.go", Range: testRange3},
 			{DumpID: 51, Path: "bonk.go", Range: testRange4},
 		}, 2)
-		setMockBundleClientMonikerResults(t, mockBundleClient3, "reference", "gomod", "bar", 0, 1, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient3, "reference", "gomod", "bar", 0, 1, []clienttypes.Location{
 			{DumpID: 52, Path: "quux.go", Range: testRange5},
 		}, 1)
 
@@ -496,7 +497,7 @@ func TestHandleSameRepoCursorMultipleDumpBatches(t *testing.T) {
 		{DumpID: 50, Filter: readTestFilter(t, "normal", "1")},
 		{DumpID: 51, Filter: readTestFilter(t, "normal", "1")},
 	})
-	setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+	setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 		{DumpID: 51, Path: "baz.go", Range: testRange3},
 		{DumpID: 51, Path: "bonk.go", Range: testRange4},
 	}, 2)
@@ -578,7 +579,7 @@ func TestHandleRemoteRepoCursor(t *testing.T) {
 	})
 
 	t.Run("partial results", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 			{DumpID: 51, Path: "baz.go", Range: testRange3},
@@ -639,15 +640,15 @@ func TestHandleRemoteRepoCursor(t *testing.T) {
 	})
 
 	t.Run("multiple pages", func(t *testing.T) {
-		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient1, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 			{DumpID: 50, Path: "foo.go", Range: testRange1},
 			{DumpID: 50, Path: "bar.go", Range: testRange2},
 		}, 2)
-		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "bar", 0, 3, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient2, "reference", "gomod", "bar", 0, 3, []clienttypes.Location{
 			{DumpID: 51, Path: "baz.go", Range: testRange3},
 			{DumpID: 51, Path: "bonk.go", Range: testRange4},
 		}, 2)
-		setMockBundleClientMonikerResults(t, mockBundleClient3, "reference", "gomod", "bar", 0, 1, []bundles.Location{
+		setMockBundleClientMonikerResults(t, mockBundleClient3, "reference", "gomod", "bar", 0, 1, []clienttypes.Location{
 			{DumpID: 52, Path: "quux.go", Range: testRange5},
 		}, 1)
 
@@ -701,7 +702,7 @@ func TestHandleRemoteRepoCursorMultipleDumpBatches(t *testing.T) {
 		{DumpID: 50, Filter: readTestFilter(t, "normal", "1")},
 		{DumpID: 51, Filter: readTestFilter(t, "normal", "1")},
 	})
-	setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "bar", 0, 5, []bundles.Location{
+	setMockBundleClientMonikerResults(t, mockBundleClient, "reference", "gomod", "bar", 0, 5, []clienttypes.Location{
 		{DumpID: 51, Path: "baz.go", Range: testRange3},
 		{DumpID: 51, Path: "bonk.go", Range: testRange4},
 	}, 2)

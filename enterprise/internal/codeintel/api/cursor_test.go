@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 	storemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store/mocks"
 )
@@ -17,7 +18,7 @@ func TestSerializationRoundTrip(t *testing.T) {
 		Path:      "/foo/bar/baz.go",
 		Line:      10,
 		Character: 50,
-		Monikers: []bundles.MonikerData{
+		Monikers: []clienttypes.MonikerData{
 			{Kind: "k1", Scheme: "s1", Identifier: "i1", PackageInformationID: "pid1"},
 			{Kind: "k2", Scheme: "s2", Identifier: "i2", PackageInformationID: "pid2"},
 			{Kind: "k3", Scheme: "s3", Identifier: "i3", PackageInformationID: "pid3"},
@@ -51,7 +52,7 @@ func TestDecodeOrCreateCursor(t *testing.T) {
 
 	setMockStoreGetDumpByID(t, mockStore, map[int]store.Dump{42: testDump1})
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient})
-	setMockBundleClientMonikersByPosition(t, mockBundleClient, "main.go", 10, 20, [][]bundles.MonikerData{{testMoniker1}, {testMoniker2}})
+	setMockBundleClientMonikersByPosition(t, mockBundleClient, "main.go", 10, 20, [][]clienttypes.MonikerData{{testMoniker1}, {testMoniker2}})
 
 	expectedCursor := Cursor{
 		Phase:     "same-dump",
@@ -59,7 +60,7 @@ func TestDecodeOrCreateCursor(t *testing.T) {
 		Path:      "main.go",
 		Line:      10,
 		Character: 20,
-		Monikers:  []bundles.MonikerData{testMoniker1, testMoniker2},
+		Monikers:  []clienttypes.MonikerData{testMoniker1, testMoniker2},
 	}
 
 	if cursor, err := DecodeOrCreateCursor("sub1/main.go", 10, 20, 42, "", mockStore, mockBundleManagerClient); err != nil {
@@ -86,7 +87,7 @@ func TestDecodeOrCreateCursorExisting(t *testing.T) {
 		Path:      "/foo/bar/baz.go",
 		Line:      10,
 		Character: 50,
-		Monikers: []bundles.MonikerData{
+		Monikers: []clienttypes.MonikerData{
 			{Kind: "k1", Scheme: "s1", Identifier: "i1", PackageInformationID: "pid1"},
 			{Kind: "k2", Scheme: "s2", Identifier: "i2", PackageInformationID: "pid2"},
 			{Kind: "k3", Scheme: "s3", Identifier: "i3", PackageInformationID: "pid3"},

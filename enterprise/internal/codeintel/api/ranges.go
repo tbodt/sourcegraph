@@ -7,10 +7,11 @@ import (
 	"github.com/inconshreveable/log15"
 	"github.com/pkg/errors"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 )
 
 type ResolvedCodeIntelligenceRange struct {
-	Range       bundles.Range
+	Range       clienttypes.Range
 	Definitions []ResolvedLocation
 	References  []ResolvedLocation
 	HoverText   string

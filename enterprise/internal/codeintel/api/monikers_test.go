@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 	storemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store/mocks"
 )
@@ -19,7 +20,7 @@ func TestLookupMoniker(t *testing.T) {
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient1, 50: mockBundleClient2})
 	setMockBundleClientPackageInformation(t, mockBundleClient1, "sub2/main.go", "1234", testPackageInformation)
 	setMockStoreGetPackage(t, mockStore, "gomod", "leftpad", "0.1.0", testDump2, true)
-	setMockBundleClientMonikerResults(t, mockBundleClient2, "definition", "gomod", "pad", 10, 5, []bundles.Location{
+	setMockBundleClientMonikerResults(t, mockBundleClient2, "definition", "gomod", "pad", 10, 5, []clienttypes.Location{
 		{DumpID: 42, Path: "foo.go", Range: testRange1},
 		{DumpID: 42, Path: "bar.go", Range: testRange2},
 		{DumpID: 42, Path: "baz.go", Range: testRange3},

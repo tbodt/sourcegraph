@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	commitmocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/commits/mocks"
 	gitservermocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/gitserver/mocks"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
@@ -64,12 +65,12 @@ func TestHoverRemoteDefinitionHoverText(t *testing.T) {
 
 	setMockStoreGetDumpByID(t, mockStore, map[int]store.Dump{42: testDump1, 50: testDump2})
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient1, 50: mockBundleClient2})
-	setMockBundleClientHover(t, mockBundleClient1, "main.go", 10, 50, "", bundles.Range{}, false)
+	setMockBundleClientHover(t, mockBundleClient1, "main.go", 10, 50, "", clienttypes.Range{}, false)
 	setMockBundleClientDefinitions(t, mockBundleClient1, "main.go", 10, 50, nil)
-	setMockBundleClientMonikersByPosition(t, mockBundleClient1, "main.go", 10, 50, [][]bundles.MonikerData{{testMoniker1}})
+	setMockBundleClientMonikersByPosition(t, mockBundleClient1, "main.go", 10, 50, [][]clienttypes.MonikerData{{testMoniker1}})
 	setMockBundleClientPackageInformation(t, mockBundleClient1, "main.go", "1234", testPackageInformation)
 	setMockStoreGetPackage(t, mockStore, "gomod", "leftpad", "0.1.0", testDump2, true)
-	setMockBundleClientMonikerResults(t, mockBundleClient2, "definition", "gomod", "pad", 0, 100, []bundles.Location{
+	setMockBundleClientMonikerResults(t, mockBundleClient2, "definition", "gomod", "pad", 0, 100, []clienttypes.Location{
 		{DumpID: 50, Path: "foo.go", Range: testRange1},
 		{DumpID: 50, Path: "bar.go", Range: testRange2},
 		{DumpID: 50, Path: "baz.go", Range: testRange3},
@@ -102,9 +103,9 @@ func TestHoverUnknownDefinition(t *testing.T) {
 
 	setMockStoreGetDumpByID(t, mockStore, map[int]store.Dump{42: testDump1})
 	setMockBundleManagerClientBundleClient(t, mockBundleManagerClient, map[int]bundles.BundleClient{42: mockBundleClient})
-	setMockBundleClientHover(t, mockBundleClient, "main.go", 10, 50, "", bundles.Range{}, false)
+	setMockBundleClientHover(t, mockBundleClient, "main.go", 10, 50, "", clienttypes.Range{}, false)
 	setMockBundleClientDefinitions(t, mockBundleClient, "main.go", 10, 50, nil)
-	setMockBundleClientMonikersByPosition(t, mockBundleClient, "main.go", 10, 50, [][]bundles.MonikerData{{testMoniker1}})
+	setMockBundleClientMonikersByPosition(t, mockBundleClient, "main.go", 10, 50, [][]clienttypes.MonikerData{{testMoniker1}})
 	setMockBundleClientPackageInformation(t, mockBundleClient, "main.go", "1234", testPackageInformation)
 	setMockStoreGetPackage(t, mockStore, "gomod", "leftpad", "0.1.0", store.Dump{}, false)
 

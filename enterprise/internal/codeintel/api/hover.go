@@ -7,16 +7,17 @@ import (
 	"github.com/inconshreveable/log15"
 	"github.com/pkg/errors"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 )
 
 // Hover returns the hover text and range for the symbol at the given position.
-func (api *codeIntelAPI) Hover(ctx context.Context, file string, line, character, uploadID int) (string, bundles.Range, bool, error) {
+func (api *codeIntelAPI) Hover(ctx context.Context, file string, line, character, uploadID int) (string, clienttypes.Range, bool, error) {
 	dump, exists, err := api.store.GetDumpByID(ctx, uploadID)
 	if err != nil {
-		return "", bundles.Range{}, false, errors.Wrap(err, "store.GetDumpByID")
+		return "", clienttypes.Range{}, false, errors.Wrap(err, "store.GetDumpByID")
 	}
 	if !exists {
-		return "", bundles.Range{}, false, ErrMissingDump
+		return "", clienttypes.Range{}, false, ErrMissingDump
 	}
 
 	pathInBundle := strings.TrimPrefix(file, dump.Root)
@@ -26,9 +27,9 @@ func (api *codeIntelAPI) Hover(ctx context.Context, file string, line, character
 	if err != nil {
 		if err == bundles.ErrNotFound {
 			log15.Warn("Bundle does not exist")
-			return "", bundles.Range{}, false, nil
+			return "", clienttypes.Range{}, false, nil
 		}
-		return "", bundles.Range{}, false, errors.Wrap(err, "bundleClient.Hover")
+		return "", clienttypes.Range{}, false, errors.Wrap(err, "bundleClient.Hover")
 	}
 	if exists {
 		return text, rn, true, nil
@@ -36,7 +37,7 @@ func (api *codeIntelAPI) Hover(ctx context.Context, file string, line, character
 
 	definition, exists, err := api.definitionRaw(ctx, dump, bundleClient, pathInBundle, line, character)
 	if err != nil || !exists {
-		return "", bundles.Range{}, false, errors.Wrap(err, "api.definitionRaw")
+		return "", clienttypes.Range{}, false, errors.Wrap(err, "api.definitionRaw")
 	}
 
 	pathInDefinitionBundle := strings.TrimPrefix(definition.Path, definition.Dump.Root)
@@ -46,9 +47,9 @@ func (api *codeIntelAPI) Hover(ctx context.Context, file string, line, character
 	if err != nil {
 		if err == bundles.ErrNotFound {
 			log15.Warn("Bundle does not exist")
-			return "", bundles.Range{}, false, nil
+			return "", clienttypes.Range{}, false, nil
 		}
-		return "", bundles.Range{}, false, errors.Wrap(err, "definitionBundleClient.Hover")
+		return "", clienttypes.Range{}, false, errors.Wrap(err, "definitionBundleClient.Hover")
 	}
 
 	return text, rn, exists, nil

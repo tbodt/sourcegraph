@@ -9,6 +9,7 @@ import (
 	pkgerrors "github.com/pkg/errors"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bloomfilter"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 )
@@ -162,7 +163,7 @@ func (s *ReferencePageResolver) handleSameDumpMonikersCursor(ctx context.Context
 	}
 
 	var totalCount int
-	var locations []bundles.Location
+	var locations []clienttypes.Location
 
 	// Search the references table of the current dump. This search is necessary because
 	// we want a 'Find References' operation on a reference to also return references to
@@ -423,7 +424,7 @@ func (s *ReferencePageResolver) resolveLocationsViaReferencePager(ctx context.Co
 	return nil, Cursor{}, false, nil
 }
 
-func hashLocation(location bundles.Location) string {
+func hashLocation(location clienttypes.Location) string {
 	return fmt.Sprintf(
 		"%s:%d:%d:%d:%d",
 		location.Path,

@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	commitmocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/commits/mocks"
 	gitservermocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/gitserver/mocks"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
@@ -20,7 +21,7 @@ func TestDiagnostics(t *testing.T) {
 	mockGitserverClient := gitservermocks.NewMockClient()
 	mockCommitUpdater := commitmocks.NewMockUpdater()
 
-	sourceDiagnostics := []bundles.Diagnostic{
+	sourceDiagnostics := []clienttypes.Diagnostic{
 		{
 			Path:           "internal/foo.go",
 			Severity:       1,
@@ -72,7 +73,7 @@ func TestDiagnostics(t *testing.T) {
 				ID:   42,
 				Root: "sub1/",
 			},
-			Diagnostic: bundles.Diagnostic{
+			Diagnostic: clienttypes.Diagnostic{
 				Path:           "sub1/internal/foo.go",
 				Severity:       1,
 				Code:           "c1",
@@ -89,7 +90,7 @@ func TestDiagnostics(t *testing.T) {
 				ID:   42,
 				Root: "sub1/",
 			},
-			Diagnostic: bundles.Diagnostic{
+			Diagnostic: clienttypes.Diagnostic{
 				Path:           "sub1/internal/bar.go",
 				Severity:       2,
 				Code:           "c2",
@@ -106,7 +107,7 @@ func TestDiagnostics(t *testing.T) {
 				ID:   42,
 				Root: "sub1/",
 			},
-			Diagnostic: bundles.Diagnostic{
+			Diagnostic: clienttypes.Diagnostic{
 				Path:           "sub1/internal/baz.go",
 				Severity:       3,
 				Code:           "c3",

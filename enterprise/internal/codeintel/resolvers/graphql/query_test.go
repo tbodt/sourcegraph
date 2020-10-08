@@ -7,7 +7,7 @@ import (
 
 	gql "github.com/sourcegraph/sourcegraph/cmd/frontend/graphqlbackend"
 	"github.com/sourcegraph/sourcegraph/cmd/frontend/graphqlbackend/graphqlutil"
-	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	resolvermocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/resolvers/mocks"
 )
 
@@ -132,7 +132,7 @@ func TestReferencesDefaultIllegalLimit(t *testing.T) {
 
 func TestHover(t *testing.T) {
 	mockResolver := resolvermocks.NewMockQueryResolver()
-	mockResolver.HoverFunc.SetDefaultReturn("text", bundles.Range{}, true, nil)
+	mockResolver.HoverFunc.SetDefaultReturn("text", clienttypes.Range{}, true, nil)
 	resolver := NewQueryResolver(mockResolver, NewCachedLocationResolver())
 
 	args := &gql.LSIFQueryPositionArgs{Line: 10, Character: 15}

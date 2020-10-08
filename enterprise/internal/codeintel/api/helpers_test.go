@@ -10,6 +10,7 @@ import (
 
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
 	bundlemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client/mocks"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 	storemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store/mocks"
@@ -21,30 +22,30 @@ var (
 	testDump2              = store.Dump{ID: 50, Root: "sub2/"}
 	testDump3              = store.Dump{ID: 51, Root: "sub3/"}
 	testDump4              = store.Dump{ID: 52, Root: "sub4/"}
-	testMoniker1           = bundles.MonikerData{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}
-	testMoniker2           = bundles.MonikerData{Kind: "export", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}
-	testMoniker3           = bundles.MonikerData{Kind: "export", Scheme: "gomod", Identifier: "pad"}
-	testPackageInformation = bundles.PackageInformationData{Name: "leftpad", Version: "0.1.0"}
+	testMoniker1           = clienttypes.MonikerData{Kind: "import", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}
+	testMoniker2           = clienttypes.MonikerData{Kind: "export", Scheme: "gomod", Identifier: "pad", PackageInformationID: "1234"}
+	testMoniker3           = clienttypes.MonikerData{Kind: "export", Scheme: "gomod", Identifier: "pad"}
+	testPackageInformation = clienttypes.PackageInformationData{Name: "leftpad", Version: "0.1.0"}
 
-	testRange1 = bundles.Range{
-		Start: bundles.Position{Line: 10, Character: 50},
-		End:   bundles.Position{Line: 10, Character: 55},
+	testRange1 = clienttypes.Range{
+		Start: clienttypes.Position{Line: 10, Character: 50},
+		End:   clienttypes.Position{Line: 10, Character: 55},
 	}
-	testRange2 = bundles.Range{
-		Start: bundles.Position{Line: 11, Character: 50},
-		End:   bundles.Position{Line: 11, Character: 55},
+	testRange2 = clienttypes.Range{
+		Start: clienttypes.Position{Line: 11, Character: 50},
+		End:   clienttypes.Position{Line: 11, Character: 55},
 	}
-	testRange3 = bundles.Range{
-		Start: bundles.Position{Line: 12, Character: 50},
-		End:   bundles.Position{Line: 12, Character: 55},
+	testRange3 = clienttypes.Range{
+		Start: clienttypes.Position{Line: 12, Character: 50},
+		End:   clienttypes.Position{Line: 12, Character: 55},
 	}
-	testRange4 = bundles.Range{
-		Start: bundles.Position{Line: 13, Character: 50},
-		End:   bundles.Position{Line: 13, Character: 55},
+	testRange4 = clienttypes.Range{
+		Start: clienttypes.Position{Line: 13, Character: 50},
+		End:   clienttypes.Position{Line: 13, Character: 55},
 	}
-	testRange5 = bundles.Range{
-		Start: bundles.Position{Line: 14, Character: 50},
-		End:   bundles.Position{Line: 14, Character: 55},
+	testRange5 = clienttypes.Range{
+		Start: clienttypes.Position{Line: 14, Character: 50},
+		End:   clienttypes.Position{Line: 14, Character: 55},
 	}
 )
 
@@ -191,8 +192,8 @@ func setMockBundleClientExists(t *testing.T, mockBundleClient *bundlemocks.MockB
 	})
 }
 
-func setMockBundleClientRanges(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedStartLine, expectedEndLine int, ranges []bundles.CodeIntelligenceRange) {
-	mockBundleClient.RangesFunc.SetDefaultHook(func(ctx context.Context, path string, startLine, endLine int) ([]bundles.CodeIntelligenceRange, error) {
+func setMockBundleClientRanges(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedStartLine, expectedEndLine int, ranges []clienttypes.CodeIntelligenceRange) {
+	mockBundleClient.RangesFunc.SetDefaultHook(func(ctx context.Context, path string, startLine, endLine int) ([]clienttypes.CodeIntelligenceRange, error) {
 		if path != expectedPath {
 			t.Errorf("unexpected path for Ranges. want=%s have=%s", expectedPath, path)
 		}
@@ -206,8 +207,8 @@ func setMockBundleClientRanges(t *testing.T, mockBundleClient *bundlemocks.MockB
 	})
 }
 
-func setMockBundleClientDefinitions(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, locations []bundles.Location) {
-	mockBundleClient.DefinitionsFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([]bundles.Location, error) {
+func setMockBundleClientDefinitions(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, locations []clienttypes.Location) {
+	mockBundleClient.DefinitionsFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([]clienttypes.Location, error) {
 		if path != expectedPath {
 			t.Errorf("unexpected path for Definitions. want=%s have=%s", expectedPath, path)
 		}
@@ -221,8 +222,8 @@ func setMockBundleClientDefinitions(t *testing.T, mockBundleClient *bundlemocks.
 	})
 }
 
-func setMockBundleClientReferences(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, locations []bundles.Location) {
-	mockBundleClient.ReferencesFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([]bundles.Location, error) {
+func setMockBundleClientReferences(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, locations []clienttypes.Location) {
+	mockBundleClient.ReferencesFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([]clienttypes.Location, error) {
 		if path != expectedPath {
 			t.Errorf("unexpected path for References. want=%s have=%s", expectedPath, path)
 		}
@@ -236,8 +237,8 @@ func setMockBundleClientReferences(t *testing.T, mockBundleClient *bundlemocks.M
 	})
 }
 
-func setMockBundleClientHover(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, text string, r bundles.Range, exists bool) {
-	mockBundleClient.HoverFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) (string, bundles.Range, bool, error) {
+func setMockBundleClientHover(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, text string, r clienttypes.Range, exists bool) {
+	mockBundleClient.HoverFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) (string, clienttypes.Range, bool, error) {
 		if path != expectedPath {
 			t.Errorf("unexpected path for Hover. want=%s have=%s", expectedPath, path)
 		}
@@ -251,8 +252,8 @@ func setMockBundleClientHover(t *testing.T, mockBundleClient *bundlemocks.MockBu
 	})
 }
 
-func setMockBundleClientDiagnostics(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPrefix string, expectedSkip, expectedTake int, diagnostics []bundles.Diagnostic, totalCount int) {
-	mockBundleClient.DiagnosticsFunc.SetDefaultHook(func(ctx context.Context, prefix string, skip, take int) ([]bundles.Diagnostic, int, error) {
+func setMockBundleClientDiagnostics(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPrefix string, expectedSkip, expectedTake int, diagnostics []clienttypes.Diagnostic, totalCount int) {
+	mockBundleClient.DiagnosticsFunc.SetDefaultHook(func(ctx context.Context, prefix string, skip, take int) ([]clienttypes.Diagnostic, int, error) {
 		if prefix != expectedPrefix {
 			t.Errorf("unexpected prefix for Diagnostics. want=%s have=%s", expectedPrefix, prefix)
 		}
@@ -266,8 +267,8 @@ func setMockBundleClientDiagnostics(t *testing.T, mockBundleClient *bundlemocks.
 	})
 }
 
-func setMockBundleClientMonikersByPosition(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, monikers [][]bundles.MonikerData) {
-	mockBundleClient.MonikersByPositionFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([][]bundles.MonikerData, error) {
+func setMockBundleClientMonikersByPosition(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath string, expectedLine, expectedCharacter int, monikers [][]clienttypes.MonikerData) {
+	mockBundleClient.MonikersByPositionFunc.SetDefaultHook(func(ctx context.Context, path string, line, character int) ([][]clienttypes.MonikerData, error) {
 		if path != expectedPath {
 			t.Fatalf("unexpected path for MonikersByPosition. want=%s have=%s", expectedPath, path)
 		}
@@ -282,8 +283,8 @@ func setMockBundleClientMonikersByPosition(t *testing.T, mockBundleClient *bundl
 	})
 }
 
-func setMockBundleClientMonikerResults(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedModelType, expectedScheme, expectedIdentifier string, expectedSkip, expectedTake int, locations []bundles.Location, totalCount int) {
-	mockBundleClient.MonikerResultsFunc.SetDefaultHook(func(ctx context.Context, modelType, scheme, identifier string, skip, take int) ([]bundles.Location, int, error) {
+func setMockBundleClientMonikerResults(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedModelType, expectedScheme, expectedIdentifier string, expectedSkip, expectedTake int, locations []clienttypes.Location, totalCount int) {
+	mockBundleClient.MonikerResultsFunc.SetDefaultHook(func(ctx context.Context, modelType, scheme, identifier string, skip, take int) ([]clienttypes.Location, int, error) {
 		if modelType != expectedModelType {
 			t.Errorf("unexpected model type for MonikerResults. want=%s have=%s", expectedModelType, modelType)
 		}
@@ -303,8 +304,8 @@ func setMockBundleClientMonikerResults(t *testing.T, mockBundleClient *bundlemoc
 	})
 }
 
-func setMockBundleClientPackageInformation(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath, expectedPackageInformationID string, packageInformation bundles.PackageInformationData) {
-	mockBundleClient.PackageInformationFunc.SetDefaultHook(func(ctx context.Context, path, packageInformationID string) (bundles.PackageInformationData, error) {
+func setMockBundleClientPackageInformation(t *testing.T, mockBundleClient *bundlemocks.MockBundleClient, expectedPath, expectedPackageInformationID string, packageInformation clienttypes.PackageInformationData) {
+	mockBundleClient.PackageInformationFunc.SetDefaultHook(func(ctx context.Context, path, packageInformationID string) (clienttypes.PackageInformationData, error) {
 		if path != expectedPath {
 			t.Errorf("unexpected path for PackageInformation. want=%s have=%s", expectedPath, path)
 		}

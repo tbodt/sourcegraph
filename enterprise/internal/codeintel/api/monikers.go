@@ -6,6 +6,7 @@ import (
 	"github.com/inconshreveable/log15"
 	"github.com/pkg/errors"
 	bundles "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
 )
 
@@ -15,7 +16,7 @@ func lookupMoniker(
 	dumpID int,
 	path string,
 	modelType string,
-	moniker bundles.MonikerData,
+	moniker clienttypes.MonikerData,
 	skip int,
 	take int,
 ) ([]ResolvedLocation, int, error) {
