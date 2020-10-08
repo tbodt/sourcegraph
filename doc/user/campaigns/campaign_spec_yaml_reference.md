@@ -241,9 +241,17 @@ changesetTemplate:
 
 ## [`changesetTemplate.published`](#changesettemplate-published)
 
-Whether to publish the changeset. This may be a boolean value (ie `true` or `false`), or [an array to only publish some changesets within the campaign](#publishing-only-specific-changesets).
+Whether to publish the changeset. This may be a boolean value (ie `true` or `false`), `'draft'`, or [an array to only publish some changesets within the campaign](#publishing-only-specific-changesets).
 
 An unpublished changeset can be previewed on Sourcegraph by any person who can view the campaign, but its commit, branch, and pull request aren't created on the code host.
+
+A draft changeset results in a commit, branch, and pull request / merge request being created on the code host **in draft mode**. This means:
+
+- On GitHub the pull request will be in draft mode.
+- On GitLab the merge request title will be prefixed with `'[Draft] '`, making it unmergeable until it's taken out of draft mode.
+- On BitBucket Server the pull request title will be prefixed with `'WIP: '`.
+
+**Note:** An existing changeset will not be converted to a draft changeset when it already exists. Hence, changesets can only go from unpublished to draft, but not from published to draft. That also allows you to take it out of draft mode on your code host, without risking Sourcegraph to revert to draft mode.
 
 A published changeset results in a commit, branch, and pull request being created on the code host.
 
@@ -255,6 +263,7 @@ To publish only specific changesets within a campaign, an array of single-elemen
 published:
   - github.com/sourcegraph/sourcegraph: true
   - github.com/sourcegraph/src-cli: false
+  - github.com/sourcegraph/campaignutils: draft
 ```
 
 Each key will be matched against the repository name using [glob](https://godoc.org/github.com/gobwas/glob#Compile) syntax. The [gobwas/glob library](https://godoc.org/github.com/gobwas/glob#Compile) is used for matching, with the key operators being:

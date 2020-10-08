@@ -123,6 +123,8 @@ After you've added patches, you can see a preview of the changesets (e.g., GitHu
 
 When you're ready, you can publish all of a campaign's changesets by changing the `published: false` in your campaign spec to `true`:
 
+> You can also [create changesets as drafts on the code hosts](campaign_spec_yaml_reference.md#changesettemplate-published).
+
 ```yaml
 name: hello-world
 
