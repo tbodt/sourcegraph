@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 )
 
 func TestExists(t *testing.T) {
@@ -86,23 +87,23 @@ func TestRanges(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := []CodeIntelligenceRange{
+	expected := []clienttypes.CodeIntelligenceRange{
 		{
-			Range:       Range{Start: Position{1, 2}, End: Position{3, 4}},
-			Definitions: []Location{},
-			References:  []Location{},
+			Range:       clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}},
+			Definitions: []clienttypes.Location{},
+			References:  []clienttypes.Location{},
 			HoverText:   "",
 		},
 		{
-			Range:       Range{Start: Position{2, 3}, End: Position{4, 5}},
-			Definitions: []Location{{Path: "foo.go", Range: Range{Start: Position{10, 20}, End: Position{30, 40}}}},
-			References:  []Location{{Path: "bar.go", Range: Range{Start: Position{100, 200}, End: Position{300, 400}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{2, 3}, End: clienttypes.Position{4, 5}},
+			Definitions: []clienttypes.Location{{Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{10, 20}, End: clienttypes.Position{30, 40}}}},
+			References:  []clienttypes.Location{{Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{100, 200}, End: clienttypes.Position{300, 400}}}},
 			HoverText:   "ht2",
 		},
 		{
-			Range:       Range{Start: Position{3, 4}, End: Position{5, 6}},
-			Definitions: []Location{{Path: "bar.go", Range: Range{Start: Position{11, 21}, End: Position{31, 41}}}},
-			References:  []Location{{Path: "foo.go", Range: Range{Start: Position{101, 201}, End: Position{301, 401}}}},
+			Range:       clienttypes.Range{Start: clienttypes.Position{3, 4}, End: clienttypes.Position{5, 6}},
+			Definitions: []clienttypes.Location{{Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{11, 21}, End: clienttypes.Position{31, 41}}}},
+			References:  []clienttypes.Location{{Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{101, 201}, End: clienttypes.Position{301, 401}}}},
 			HoverText:   "ht3",
 		},
 	}
@@ -157,9 +158,9 @@ func TestDefinitions(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := []Location{
-		{DumpID: 42, Path: "foo.go", Range: Range{Start: Position{1, 2}, End: Position{3, 4}}},
-		{DumpID: 42, Path: "bar.go", Range: Range{Start: Position{5, 6}, End: Position{7, 8}}},
+	expected := []clienttypes.Location{
+		{DumpID: 42, Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}}},
+		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
 	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
@@ -186,9 +187,9 @@ func TestReferences(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := []Location{
-		{DumpID: 42, Path: "foo.go", Range: Range{Start: Position{1, 2}, End: Position{3, 4}}},
-		{DumpID: 42, Path: "bar.go", Range: Range{Start: Position{5, 6}, End: Position{7, 8}}},
+	expected := []clienttypes.Location{
+		{DumpID: 42, Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}}},
+		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
 	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
@@ -216,9 +217,9 @@ func TestHover(t *testing.T) {
 	defer ts.Close()
 
 	expectedText := "starts the program"
-	expectedRange := Range{
-		Start: Position{1, 2},
-		End:   Position{3, 4},
+	expectedRange := clienttypes.Range{
+		Start: clienttypes.Position{1, 2},
+		End:   clienttypes.Position{3, 4},
 	}
 
 	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
@@ -233,7 +234,7 @@ func TestHover(t *testing.T) {
 		if text != expectedText {
 			t.Errorf("unexpected hover text. want=%v have=%v", expectedText, text)
 		} else if diff := cmp.Diff(expectedRange, r); diff != "" {
-			t.Errorf("unexpected hover range (-want +got):\n%s", diff)
+			t.Errorf("unexpected hover clienttypes.Range (-want +got):\n%s", diff)
 		}
 	}
 }
@@ -284,7 +285,7 @@ func TestDiagnostics(t *testing.T) {
 		t.Fatalf("unexpected error querying diagnostics: %s", err)
 	}
 
-	expectedDiagnostics := []Diagnostic{
+	expectedDiagnostics := []clienttypes.Diagnostic{
 		{
 			DumpID:         42,
 			Path:           "internal/foo.go",
@@ -360,7 +361,7 @@ func TestMonikersByPosition(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := [][]MonikerData{
+	expected := [][]clienttypes.MonikerData{
 		{
 			{Kind: "import", Scheme: "gomod", Identifier: "pad1"},
 		},
@@ -399,9 +400,9 @@ func TestMonikerResults(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := []Location{
-		{DumpID: 42, Path: "foo.go", Range: Range{Start: Position{1, 2}, End: Position{3, 4}}},
-		{DumpID: 42, Path: "bar.go", Range: Range{Start: Position{5, 6}, End: Position{7, 8}}},
+	expected := []clienttypes.Location{
+		{DumpID: 42, Path: "foo.go", Range: clienttypes.Range{Start: clienttypes.Position{1, 2}, End: clienttypes.Position{3, 4}}},
+		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
 	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
@@ -428,7 +429,7 @@ func TestPackageInformation(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	expected := PackageInformationData{
+	expected := clienttypes.PackageInformationData{
 		Name:    "leftpad",
 		Version: "0.1.0",
 	}
