@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	pkgerrors "github.com/pkg/errors"
+
 	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/database"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/persistence"
@@ -229,7 +230,14 @@ func (c *bundleClientImpl) MonikerResults(ctx context.Context, modelType, scheme
 	target := Response{}
 
 	err = c.request(ctx, "monikerResults", args, &target, func(db database.Database) (err error) {
-		locations, count, err := c.MonikerResults(ctx, modelType, scheme, identifier, skip, take)
+		var tableName string
+		if modelType == "definition" {
+			tableName = "definitions"
+		} else if modelType == "reference" {
+			tableName = "references"
+		}
+
+		locations, count, err := db.MonikerResults(ctx, tableName, scheme, identifier, skip, take)
 		target = Response{locations, count}
 		return err
 	})
@@ -254,9 +262,11 @@ func (c *bundleClientImpl) PackageInformation(ctx context.Context, path, package
 }
 
 func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[string]interface{}, target interface{}, handler func(database.Database) error) error {
-	if _, err := c.store.ReadMeta(ctx); err == postgresreader.ErrNoMetadata {
-		return c.base.QueryBundle(ctx, c.bundleID, path, qs, &target)
-	} else if err != nil {
+	if _, err := c.store.ReadMeta(ctx); err != nil {
+		if err == postgresreader.ErrNoMetadata {
+			return c.base.QueryBundle(ctx, c.bundleID, path, qs, &target)
+		}
+
 		return err
 	}
 
