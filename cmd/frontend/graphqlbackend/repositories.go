@@ -28,6 +28,7 @@ func (r *schemaResolver) Repositories(args *struct {
 	NotIndexed bool
 	OrderBy    string
 	Descending bool
+	After      *string
 }) (*repositoryConnectionResolver, error) {
 	opt := db.ReposListOptions{
 		OrderBy: db.RepoListOrderBy{{
@@ -40,6 +41,14 @@ func (r *schemaResolver) Repositories(args *struct {
 	}
 	if args.Query != nil {
 		opt.Query = *args.Query
+	}
+	if args.After != nil {
+		cursor, err := unmarshalRepositoryCursor(args.After)
+		if err != nil {
+			return nil, err
+		}
+		opt.After = cursor.After
+		opt.Descending = args.Descending
 	}
 	args.ConnectionArgs.Set(&opt.LimitOffset)
 	return &repositoryConnectionResolver{
@@ -123,10 +132,20 @@ func (r *repositoryConnectionResolver) compute(ctx context.Context) ([]*types.Re
 		}
 
 		for {
+			// Cursor-based pagination requires that we fetch limit+1 records, so
+			// that we know whether or not there's an additional page (or more)
+			// beyond the current one. We reset the limit immediately afterward for
+			// any subsequent calculations.
+			if opt2.LimitOffset != nil {
+				opt2.LimitOffset.Limit++
+			}
 			repos, err := backend.Repos.List(ctx, opt2)
 			if err != nil {
 				r.err = err
 				return
+			}
+			if opt2.LimitOffset != nil {
+				opt2.LimitOffset.Limit--
 			}
 			reposFromDB := len(repos)
 
@@ -221,7 +240,12 @@ func (r *repositoryConnectionResolver) PageInfo(ctx context.Context) (*graphqlut
 	if err != nil {
 		return nil, err
 	}
-	return graphqlutil.HasNextPage(r.opt.LimitOffset != nil && len(repos) >= r.opt.Limit), nil
+	if r.opt.LimitOffset == nil || len(repos) <= r.opt.Limit {
+		return graphqlutil.HasNextPage(false), nil
+	}
+	return graphqlutil.NextPageCursor(marshalRepositoryCursor(
+		&repositoryCursor{After: int(repos[len(repos)-1].ID)},
+	)), nil
 }
 
 func (r *schemaResolver) SetRepositoryEnabled(ctx context.Context, args *struct {

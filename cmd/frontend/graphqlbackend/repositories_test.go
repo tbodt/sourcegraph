@@ -12,9 +12,10 @@ import (
 func TestRepositories(t *testing.T) {
 	resetMocks()
 	repos := []*types.Repo{
-		{Name: "repo1"},
-		{Name: "repo2"},
+		{ID: 0, Name: "repo1"},
+		{ID: 1, Name: "repo2"},
 		{
+			ID:   2,
 			Name: "repo3",
 			RepoFields: &types.RepoFields{
 				Cloned: true,
@@ -28,7 +29,12 @@ func TestRepositories(t *testing.T) {
 		if opt.OnlyCloned {
 			return repos[2:], nil
 		}
-
+		if opt.LimitOffset != nil {
+			if opt.After > 0 {
+				return repos[opt.After : opt.LimitOffset.Limit+1], nil
+			}
+			return repos[:opt.LimitOffset.Limit], nil
+		}
 		return repos, nil
 	}
 
@@ -170,6 +176,93 @@ func TestRepositories(t *testing.T) {
 							{ "name": "repo2" }
 						],
 						"pageInfo": {"hasNextPage": false}
+					}
+				}
+			`,
+		},
+		{
+			Schema: mustParseGraphQLSchema(t),
+			Query: `
+				{
+					repositories(first: 1) {
+						nodes {
+							name
+						}
+						pageInfo {
+							endCursor
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"repositories": {
+						"nodes": [
+							{
+								"name": "repo1"
+							}
+						],
+						"pageInfo": {
+							"endCursor": "UmVwb3NpdG9yeUN1cnNvcjp7IkFmdGVyIjoxfQ=="
+						}
+					}
+				}
+			`,
+		},
+		{
+			Schema: mustParseGraphQLSchema(t),
+			Query: `
+				{
+					repositories(first: 1, after: "UmVwb3NpdG9yeUN1cnNvcjp7IkFmdGVyIjoxfQ==") {
+						nodes {
+							name
+						}
+						pageInfo {
+							endCursor
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"repositories": {
+						"nodes": [
+							{
+								"name": "repo2"
+							}
+						],
+						"pageInfo": {
+							"endCursor": "UmVwb3NpdG9yeUN1cnNvcjp7IkFmdGVyIjoyfQ=="
+						}
+					}
+				}
+			`,
+		},
+		{
+			Schema: mustParseGraphQLSchema(t),
+			Query: `
+				{
+					repositories(first: 1, after: "UmVwb3NpdG9yeUN1cnNvcjp7IkFmdGVyIjoyfQ==") {
+						nodes {
+							name
+						}
+						pageInfo {
+							endCursor
+						}
+					}
+				}
+			`,
+			ExpectedResult: `
+				{
+					"repositories": {
+						"nodes": [
+							{
+								"name": "repo3"
+							}
+						],
+						"pageInfo": {
+							"endCursor": null
+						}
 					}
 				}
 			`,
