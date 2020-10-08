@@ -9,6 +9,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
+	persistencemocks "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/persistence/mocks"
+	postgresreader "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/persistence/postgres"
+	types "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/types"
 )
 
 func TestExists(t *testing.T) {
@@ -21,7 +24,10 @@ func TestExists(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	exists, err := client.Exists(context.Background(), "main.go")
 	if err != nil {
 		t.Fatalf("unexpected error querying exists: %s", err)
@@ -36,7 +42,10 @@ func TestExistsNotFound(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	_, err := client.Exists(context.Background(), "main.go")
 	if err != ErrNotFound {
 		t.Fatalf("unexpected error. want=%q have=%q", ErrNotFound, err)
@@ -49,7 +58,10 @@ func TestExistsBadResponse(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	_, err := client.Exists(context.Background(), "main.go")
 	if err == nil {
 		t.Fatalf("unexpected nil error querying exists")
@@ -108,7 +120,10 @@ func TestRanges(t *testing.T) {
 		},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	ranges, err := client.Ranges(context.Background(), "main.go", 15, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying ranges: %s", err)
@@ -123,7 +138,10 @@ func TestRangesNotFound(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	_, err := client.Ranges(context.Background(), "main.go", 15, 20)
 	if err != ErrNotFound {
 		t.Fatalf("unexpected error. want=%q have=%q", ErrNotFound, err)
@@ -136,7 +154,10 @@ func TestRangesBadResponse(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	_, err := client.Ranges(context.Background(), "main.go", 15, 20)
 	if err == nil {
 		t.Fatalf("unexpected nil error querying ranges")
@@ -163,7 +184,10 @@ func TestDefinitions(t *testing.T) {
 		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	definitions, err := client.Definitions(context.Background(), "main.go", 10, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying definitions: %s", err)
@@ -192,7 +216,10 @@ func TestReferences(t *testing.T) {
 		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	references, err := client.References(context.Background(), "main.go", 10, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying references: %s", err)
@@ -222,7 +249,10 @@ func TestHover(t *testing.T) {
 		End:   clienttypes.Position{3, 4},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	text, r, exists, err := client.Hover(context.Background(), "main.go", 10, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying hover: %s", err)
@@ -251,7 +281,10 @@ func TestHoverNull(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	_, _, exists, err := client.Hover(context.Background(), "main.go", 10, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying hover: %s", err)
@@ -279,7 +312,10 @@ func TestDiagnostics(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	diagnostics, totalCount, err := client.Diagnostics(context.Background(), "internal/", 1, 3)
 	if err != nil {
 		t.Fatalf("unexpected error querying diagnostics: %s", err)
@@ -371,7 +407,10 @@ func TestMonikersByPosition(t *testing.T) {
 		},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	monikers, err := client.MonikersByPosition(context.Background(), "main.go", 10, 20)
 	if err != nil {
 		t.Fatalf("unexpected error querying monikers by position: %s", err)
@@ -405,7 +444,10 @@ func TestMonikerResults(t *testing.T) {
 		{DumpID: 42, Path: "bar.go", Range: clienttypes.Range{Start: clienttypes.Position{5, 6}, End: clienttypes.Position{7, 8}}},
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	locations, count, err := client.MonikerResults(context.Background(), "definition", "gomod", "leftpad", 0, 25)
 	if err != nil {
 		t.Fatalf("unexpected error querying moniker results: %s", err)
@@ -434,7 +476,10 @@ func TestPackageInformation(t *testing.T) {
 		Version: "0.1.0",
 	}
 
-	client := &bundleClientImpl{base: &bundleManagerClientImpl{bundleManagerURL: ts.URL}, bundleID: 42}
+	mockStore := persistencemocks.NewMockStore()
+	mockStore.ReadMetaFunc.SetDefaultReturn(types.MetaData{}, postgresreader.ErrNoMetadata)
+	base := &bundleManagerClientImpl{bundleManagerURL: ts.URL}
+	client := &bundleClientImpl{base: base, bundleID: 42, store: mockStore}
 	packageInformation, err := client.PackageInformation(context.Background(), "main.go", "123")
 	if err != nil {
 		t.Fatalf("unexpected error querying package information: %s", err)

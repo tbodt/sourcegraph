@@ -5,7 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	pkgerrors "github.com/pkg/errors"
 	clienttypes "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/client_types"
+	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/database"
+	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/persistence"
+	postgresreader "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/bundles/persistence/postgres"
+	"github.com/sourcegraph/sourcegraph/internal/observation"
 )
 
 // BundleClient is the interface to the precise-code-intel-bundle-manager service scoped to a particular dump.
@@ -44,8 +49,10 @@ type BundleClient interface {
 }
 
 type bundleClientImpl struct {
-	base     baseClient
-	bundleID int
+	base               baseClient
+	bundleID           int
+	store              persistence.Store
+	observationContext *observation.Context
 }
 
 var _ BundleClient = &bundleClientImpl{}
@@ -57,7 +64,9 @@ func (c *bundleClientImpl) ID() int {
 
 // Exists determines if the given path exists in the dump.
 func (c *bundleClientImpl) Exists(ctx context.Context, path string) (exists bool, err error) {
-	err = c.request(ctx, "exists", map[string]interface{}{"path": path}, &exists, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "exists", map[string]interface{}{"path": path}, &exists, func(db database.Database) (interface{}, error) {
+		return db.Exists(ctx, path)
+	})
 	return exists, err
 }
 
@@ -69,7 +78,9 @@ func (c *bundleClientImpl) Ranges(ctx context.Context, path string, startLine, e
 		"endLine":   endLine,
 	}
 
-	err = c.request(ctx, "ranges", args, &codeintelRanges, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "ranges", args, &codeintelRanges, func(db database.Database) (interface{}, error) {
+		return db.Ranges(ctx, path, startLine, endLine)
+	})
 	return codeintelRanges, err
 }
 
@@ -81,7 +92,9 @@ func (c *bundleClientImpl) Definitions(ctx context.Context, path string, line, c
 		"character": character,
 	}
 
-	err = c.request(ctx, "definitions", args, &locations, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "definitions", args, &locations, func(db database.Database) (interface{}, error) {
+		return db.Definitions(ctx, path, line, character)
+	})
 	c.addBundleIDToLocations(locations)
 	return locations, err
 }
@@ -94,7 +107,9 @@ func (c *bundleClientImpl) References(ctx context.Context, path string, line, ch
 		"character": character,
 	}
 
-	err = c.request(ctx, "references", args, &locations, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "references", args, &locations, func(db database.Database) (interface{}, error) {
+		return db.References(ctx, path, line, character)
+	})
 	c.addBundleIDToLocations(locations)
 	return locations, err
 }
@@ -107,8 +122,20 @@ func (c *bundleClientImpl) Hover(ctx context.Context, path string, line, charact
 		"character": character,
 	}
 
+	type Response struct {
+		Text  string            `json:"text"`
+		Range clienttypes.Range `json:"range"`
+	}
+
 	var target *json.RawMessage
-	if err := c.request(ctx, "hover", args, &target, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") }); err != nil {
+	if err := c.request(ctx, "hover", args, &target, func(db database.Database) (interface{}, error) {
+		text, r, ok, err := db.Hover(ctx, path, line, character)
+		if err != nil || !ok {
+			return nil, err
+		}
+
+		return Response{text, r}, nil
+	}); err != nil {
 		return "", clienttypes.Range{}, false, err
 	}
 
@@ -116,11 +143,7 @@ func (c *bundleClientImpl) Hover(ctx context.Context, path string, line, charact
 		return "", clienttypes.Range{}, false, nil
 	}
 
-	payload := struct {
-		Text  string            `json:"text"`
-		Range clienttypes.Range `json:"range"`
-	}{}
-
+	payload := Response{}
 	if err := json.Unmarshal(*target, &payload); err != nil {
 		return "", clienttypes.Range{}, false, err
 	}
@@ -140,12 +163,16 @@ func (c *bundleClientImpl) Diagnostics(ctx context.Context, prefix string, skip,
 		args["take"] = take
 	}
 
-	target := struct {
+	type Response struct {
 		Diagnostics []clienttypes.Diagnostic `json:"diagnostics"`
 		Count       int                      `json:"count"`
-	}{}
+	}
+	target := Response{}
 
-	err = c.request(ctx, "diagnostics", args, &target, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "diagnostics", args, &target, func(db database.Database) (interface{}, error) {
+		diagnostics, count, err := db.Diagnostics(ctx, prefix, skip, take)
+		return Response{diagnostics, count}, err
+	})
 	diagnostics = target.Diagnostics
 	count = target.Count
 	c.addBundleIDToDiagnostics(diagnostics)
@@ -162,7 +189,9 @@ func (c *bundleClientImpl) MonikersByPosition(ctx context.Context, path string, 
 		"character": character,
 	}
 
-	err = c.request(ctx, "monikersByPosition", args, &target, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "monikersByPosition", args, &target, func(db database.Database) (interface{}, error) {
+		return db.MonikersByPosition(ctx, path, line, character)
+	})
 	return target, err
 }
 
@@ -180,12 +209,16 @@ func (c *bundleClientImpl) MonikerResults(ctx context.Context, modelType, scheme
 		args["take"] = take
 	}
 
-	target := struct {
+	type Response struct {
 		Locations []clienttypes.Location `json:"locations"`
 		Count     int                    `json:"count"`
-	}{}
+	}
+	target := Response{}
 
-	err = c.request(ctx, "monikerResults", args, &target, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "monikerResults", args, &target, func(db database.Database) (interface{}, error) {
+		locations, count, err := c.MonikerResults(ctx, modelType, scheme, identifier, skip, take)
+		return Response{locations, count}, err
+	})
 	locations = target.Locations
 	count = target.Count
 	c.addBundleIDToLocations(locations)
@@ -199,14 +232,32 @@ func (c *bundleClientImpl) PackageInformation(ctx context.Context, path, package
 		"packageInformationId": packageInformationID,
 	}
 
-	err = c.request(ctx, "packageInformation", args, &target, func() (interface{}, error) { return nil, fmt.Errorf("unimplemented") })
+	err = c.request(ctx, "packageInformation", args, &target, func(db database.Database) (interface{}, error) {
+		packageInformation, _, err := db.PackageInformation(ctx, path, packageInformationID)
+		return packageInformation, err
+	})
 	return target, err
 }
 
-func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[string]interface{}, target interface{}, handler func() (interface{}, error)) error {
-	// TODO - short-circuit here
+func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[string]interface{}, target interface{}, handler func(database.Database) (interface{}, error)) error {
+	if _, err := c.store.ReadMeta(ctx); err == postgresreader.ErrNoMetadata {
+		return c.base.QueryBundle(ctx, c.bundleID, path, qs, &target)
+	} else if err != nil {
+		return err
+	}
 
-	return c.base.QueryBundle(ctx, c.bundleID, path, qs, &target)
+	db, err := database.OpenDatabase(ctx, fmt.Sprintf("%d", c.bundleID), c.store)
+	if err != nil {
+		return pkgerrors.Wrap(err, "database.OpenDatabase")
+	}
+
+	payload, err := handler(db)
+	if err != nil {
+		return err
+	}
+
+	func(target *interface{}) { *target = payload }(&target)
+	return nil
 }
 
 func (c *bundleClientImpl) addBundleIDToLocations(locations []clienttypes.Location) {

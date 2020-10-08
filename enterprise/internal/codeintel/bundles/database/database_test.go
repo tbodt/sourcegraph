@@ -355,7 +355,7 @@ func TestDatabasePackageInformation(t *testing.T) {
 }
 
 func openTestDatabase(t *testing.T) Database {
-	filename := copyFile(t, "../../../../internal/codeintel/bundles/persistence/sqlite/testdata/lsif-go@ad3507cb.lsif.db")
+	filename := copyFile(t, "../persistence/sqlite/testdata/lsif-go@ad3507cb.lsif.db")
 
 	cache, err := cache.NewDataCache(10)
 	if err != nil {
