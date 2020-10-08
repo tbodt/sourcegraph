@@ -64,8 +64,9 @@ func (c *bundleClientImpl) ID() int {
 
 // Exists determines if the given path exists in the dump.
 func (c *bundleClientImpl) Exists(ctx context.Context, path string) (exists bool, err error) {
-	err = c.request(ctx, "exists", map[string]interface{}{"path": path}, &exists, func(db database.Database) (interface{}, error) {
-		return db.Exists(ctx, path)
+	err = c.request(ctx, "exists", map[string]interface{}{"path": path}, &exists, func(db database.Database) (err error) {
+		exists, err = db.Exists(ctx, path)
+		return err
 	})
 	return exists, err
 }
@@ -78,8 +79,9 @@ func (c *bundleClientImpl) Ranges(ctx context.Context, path string, startLine, e
 		"endLine":   endLine,
 	}
 
-	err = c.request(ctx, "ranges", args, &codeintelRanges, func(db database.Database) (interface{}, error) {
-		return db.Ranges(ctx, path, startLine, endLine)
+	err = c.request(ctx, "ranges", args, &codeintelRanges, func(db database.Database) (err error) {
+		codeintelRanges, err = db.Ranges(ctx, path, startLine, endLine)
+		return err
 	})
 	return codeintelRanges, err
 }
@@ -92,8 +94,9 @@ func (c *bundleClientImpl) Definitions(ctx context.Context, path string, line, c
 		"character": character,
 	}
 
-	err = c.request(ctx, "definitions", args, &locations, func(db database.Database) (interface{}, error) {
-		return db.Definitions(ctx, path, line, character)
+	err = c.request(ctx, "definitions", args, &locations, func(db database.Database) (err error) {
+		locations, err = db.Definitions(ctx, path, line, character)
+		return err
 	})
 	c.addBundleIDToLocations(locations)
 	return locations, err
@@ -107,8 +110,9 @@ func (c *bundleClientImpl) References(ctx context.Context, path string, line, ch
 		"character": character,
 	}
 
-	err = c.request(ctx, "references", args, &locations, func(db database.Database) (interface{}, error) {
-		return db.References(ctx, path, line, character)
+	err = c.request(ctx, "references", args, &locations, func(db database.Database) (err error) {
+		locations, err = db.References(ctx, path, line, character)
+		return err
 	})
 	c.addBundleIDToLocations(locations)
 	return locations, err
@@ -128,13 +132,20 @@ func (c *bundleClientImpl) Hover(ctx context.Context, path string, line, charact
 	}
 
 	var target *json.RawMessage
-	if err := c.request(ctx, "hover", args, &target, func(db database.Database) (interface{}, error) {
+	if err := c.request(ctx, "hover", args, &target, func(db database.Database) (err error) {
 		text, r, ok, err := db.Hover(ctx, path, line, character)
 		if err != nil || !ok {
-			return nil, err
+			return err
 		}
 
-		return Response{text, r}, nil
+		contents, err := json.Marshal(Response{text, r})
+		if err != nil {
+			return err
+		}
+
+		jsonContents := json.RawMessage(contents)
+		target = &jsonContents
+		return nil
 	}); err != nil {
 		return "", clienttypes.Range{}, false, err
 	}
@@ -169,9 +180,10 @@ func (c *bundleClientImpl) Diagnostics(ctx context.Context, prefix string, skip,
 	}
 	target := Response{}
 
-	err = c.request(ctx, "diagnostics", args, &target, func(db database.Database) (interface{}, error) {
+	err = c.request(ctx, "diagnostics", args, &target, func(db database.Database) (err error) {
 		diagnostics, count, err := db.Diagnostics(ctx, prefix, skip, take)
-		return Response{diagnostics, count}, err
+		target = Response{diagnostics, count}
+		return err
 	})
 	diagnostics = target.Diagnostics
 	count = target.Count
@@ -189,8 +201,9 @@ func (c *bundleClientImpl) MonikersByPosition(ctx context.Context, path string, 
 		"character": character,
 	}
 
-	err = c.request(ctx, "monikersByPosition", args, &target, func(db database.Database) (interface{}, error) {
-		return db.MonikersByPosition(ctx, path, line, character)
+	err = c.request(ctx, "monikersByPosition", args, &target, func(db database.Database) (err error) {
+		target, err = db.MonikersByPosition(ctx, path, line, character)
+		return err
 	})
 	return target, err
 }
@@ -215,9 +228,10 @@ func (c *bundleClientImpl) MonikerResults(ctx context.Context, modelType, scheme
 	}
 	target := Response{}
 
-	err = c.request(ctx, "monikerResults", args, &target, func(db database.Database) (interface{}, error) {
+	err = c.request(ctx, "monikerResults", args, &target, func(db database.Database) (err error) {
 		locations, count, err := c.MonikerResults(ctx, modelType, scheme, identifier, skip, take)
-		return Response{locations, count}, err
+		target = Response{locations, count}
+		return err
 	})
 	locations = target.Locations
 	count = target.Count
@@ -232,14 +246,14 @@ func (c *bundleClientImpl) PackageInformation(ctx context.Context, path, package
 		"packageInformationId": packageInformationID,
 	}
 
-	err = c.request(ctx, "packageInformation", args, &target, func(db database.Database) (interface{}, error) {
-		packageInformation, _, err := db.PackageInformation(ctx, path, packageInformationID)
-		return packageInformation, err
+	err = c.request(ctx, "packageInformation", args, &target, func(db database.Database) (err error) {
+		target, _, err = db.PackageInformation(ctx, path, packageInformationID)
+		return err
 	})
 	return target, err
 }
 
-func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[string]interface{}, target interface{}, handler func(database.Database) (interface{}, error)) error {
+func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[string]interface{}, target interface{}, handler func(database.Database) error) error {
 	if _, err := c.store.ReadMeta(ctx); err == postgresreader.ErrNoMetadata {
 		return c.base.QueryBundle(ctx, c.bundleID, path, qs, &target)
 	} else if err != nil {
@@ -251,13 +265,7 @@ func (c *bundleClientImpl) request(ctx context.Context, path string, qs map[stri
 		return pkgerrors.Wrap(err, "database.OpenDatabase")
 	}
 
-	payload, err := handler(db)
-	if err != nil {
-		return err
-	}
-
-	func(target *interface{}) { *target = payload }(&target)
-	return nil
+	return handler(db)
 }
 
 func (c *bundleClientImpl) addBundleIDToLocations(locations []clienttypes.Location) {
