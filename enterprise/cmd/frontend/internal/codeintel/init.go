@@ -2,7 +2,9 @@ package codeintel
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -19,6 +21,7 @@ import (
 	codeintelresolvers "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/resolvers"
 	codeintelgqlresolvers "github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/resolvers/graphql"
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/store"
+	"github.com/sourcegraph/sourcegraph/internal/conf"
 	"github.com/sourcegraph/sourcegraph/internal/db/dbconn"
 	"github.com/sourcegraph/sourcegraph/internal/env"
 	"github.com/sourcegraph/sourcegraph/internal/observation"
@@ -29,6 +32,8 @@ var bundleManagerURL = env.Get("PRECISE_CODE_INTEL_BUNDLE_MANAGER_URL", "", "HTT
 var rawHunkCacheSize = env.Get("PRECISE_CODE_INTEL_HUNK_CACHE_CAPACITY", "1000", "Maximum number of git diff hunk objects that can be loaded into the hunk cache at once.")
 
 func Init(ctx context.Context, enterpriseServices *enterprise.Services) error {
+	codeIntelDB := mustInitializeCodeIntelDatabase()
+
 	if bundleManagerURL == "" {
 		return fmt.Errorf("invalid value for PRECISE_CODE_INTEL_BUNDLE_MANAGER_URL: no value supplied")
 	}
@@ -45,7 +50,7 @@ func Init(ctx context.Context, enterpriseServices *enterprise.Services) error {
 	}
 
 	store := store.NewObserved(store.NewWithDB(dbconn.Global), observationContext)
-	bundleManagerClient := bundles.New(bundleManagerURL)
+	bundleManagerClient := bundles.New(codeIntelDB, observationContext, bundleManagerURL)
 	commitUpdater := commits.NewUpdater(store, codeintelgitserver.DefaultClient)
 	api := codeintelapi.NewObserved(codeintelapi.New(store, bundleManagerClient, codeintelgitserver.DefaultClient, commitUpdater), observationContext)
 	hunkCache, err := codeintelresolvers.NewHunkCache(int(hunkCacheSize))
@@ -73,4 +78,19 @@ func Init(ctx context.Context, enterpriseServices *enterprise.Services) error {
 
 	enterpriseServices.NewCodeIntelInternalProxyHandler = h
 	return nil
+}
+
+func mustInitializeCodeIntelDatabase() *sql.DB {
+	postgresDSN := conf.Get().ServiceConnections.CodeIntelPostgresDSN
+
+	db, err := dbconn.New(postgresDSN, "_codeintel")
+	if err != nil {
+		log.Fatalf("failed to connect to codeintel database: %s", err)
+	}
+
+	if err := dbconn.MigrateDB(db, "codeintel"); err != nil {
+		log.Fatalf("failed to perform codeintel database migration: %s", err)
+	}
+
+	return db
 }

@@ -259,7 +259,7 @@ func makeTestUploadFunction(ctx context.Context, name string, rev string, upload
 }
 
 // uploadIDPattern extracts a GraphQL identifier from the output of the `src lsif upload` command.
-var uploadIDPattern = regexp.MustCompile(`/code-intelligence/lsif-uploads/([0-9A-Za-z=]+)\.`)
+var uploadIDPattern = regexp.MustCompile(`/code-intelligence/lsif-uploads/([0-9A-Za-z=]+)`)
 
 // upload invokes the `src lsif upload` command. This requires that src is installed on the
 // current user's $PATH and is relatively up to date.
