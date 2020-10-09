@@ -299,6 +299,15 @@ export function fetchLsifIndexes({
                             queuedAt
                             startedAt
                             finishedAt
+                            dockerSteps {
+                                root
+                                image
+                                commands
+                            }
+                            inputRoot
+                            indexer
+                            indexerArgs
+                            outfile
                             placeInQueue
                         }
 
@@ -350,6 +359,15 @@ export function fetchLsifIndexes({
                                 queuedAt
                                 startedAt
                                 finishedAt
+                                dockerSteps {
+                                    root
+                                    image
+                                    commands
+                                }
+                                inputRoot
+                                indexer
+                                indexerArgs
+                                outfile
                                 placeInQueue
                             }
 
@@ -406,6 +424,15 @@ export function fetchLsifIndex({ id }: { id: string }): Observable<Index | null>
                         queuedAt
                         startedAt
                         finishedAt
+                        dockerSteps {
+                            root
+                            image
+                            commands
+                        }
+                        inputRoot
+                        indexer
+                        indexerArgs
+                        outfile
                         placeInQueue
                     }
                 }

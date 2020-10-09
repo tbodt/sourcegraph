@@ -167,6 +167,39 @@ export const CodeIntelIndexPage: FunctionComponent<CodeIntelIndexPageProps> = ({
                                 </td>
                             </tr>
 
+                            {/* TODO(efritz) - add docker steps */}
+                            {/* TODO(efritz) - add logs contents */}
+
+                            <tr>
+                                <td>Root</td>
+                                <td>
+                                    {indexOrError.projectRoot ? (
+                                        <Link to={indexOrError.projectRoot.url}>
+                                            <strong>{indexOrError.projectRoot.path || '/'}</strong>
+                                        </Link>
+                                    ) : (
+                                        indexOrError.inputRoot || '/'
+                                    )}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Indexer</td>
+                                <td>{indexOrError.indexer}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Indexer arguments</td>
+                                <td>
+                                    <code>{indexOrError.indexerArgs.join(' ')}</code>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Outfile</td>
+                                <td>{indexOrError.outfile}</td>
+                            </tr>
+
                             <tr>
                                 <td>Queued</td>
                                 <td>

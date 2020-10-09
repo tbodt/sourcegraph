@@ -81,6 +81,16 @@ const IndexNode: FunctionComponent<IndexNodeProps> = ({ node, onDelete, history,
                     )}
                 </code>
             </td>
+            <td>{node.indexer}</td>
+            <td>
+                {node.projectRoot ? (
+                    <Link to={node.projectRoot.url}>
+                        <strong>{node.projectRoot.path || '/'}</strong>
+                    </Link>
+                ) : (
+                    node.inputRoot || '/'
+                )}
+            </td>
             <td>
                 <Link to={`./indexes/${node.id}`}>
                     {node.state === LSIFIndexState.PROCESSING ? (
