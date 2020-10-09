@@ -9,5 +9,5 @@ import (
 
 func testAPI(store store.Store, bundleManagerClient bundles.BundleManagerClient, commitUpdater commits.Updater) CodeIntelAPI {
 	// Wrap in observed, as that's how it's used in production
-	return NewObserved(New(store, bundleManagerClient, commitUpdater), &observation.TestContext)
+	return NewObserved(New(store, bundleManagerClient, nil, commitUpdater), &observation.TestContext)
 }

@@ -39,17 +39,23 @@ type CodeIntelAPI interface {
 type codeIntelAPI struct {
 	store               store.Store
 	bundleManagerClient bundles.BundleManagerClient
+	gitserverClient     gitserverClient
 	commitUpdater       commits.Updater
+}
+
+type gitserverClient interface {
+	CommitGraph(ctx context.Context, store store.Store, repositoryID int) (map[string][]string, error)
 }
 
 var _ CodeIntelAPI = &codeIntelAPI{}
 
 var ErrMissingDump = errors.New("missing dump")
 
-func New(store store.Store, bundleManagerClient bundles.BundleManagerClient, commitUpdater commits.Updater) CodeIntelAPI {
+func New(store store.Store, bundleManagerClient bundles.BundleManagerClient, gitserverClient gitserverClient, commitUpdater commits.Updater) CodeIntelAPI {
 	return &codeIntelAPI{
 		store:               store,
 		bundleManagerClient: bundleManagerClient,
+		gitserverClient:     gitserverClient,
 		commitUpdater:       commitUpdater,
 	}
 }
