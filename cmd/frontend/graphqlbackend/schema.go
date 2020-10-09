@@ -806,6 +806,11 @@ type ExistingChangesetReference {
 }
 
 """
+A triple that represents all possible states of the published value: true, false or 'draft'.
+"""
+scalar PublishedTriple
+
+"""
 A description of a changeset that represents the proposal to merge one branch into another.
 This is used to describe a pull request (on GitHub and Bitbucket Server).
 """
@@ -887,7 +892,7 @@ type GitBranchChangesetDescription {
     Another ChangesetSpec with the same description, but "published: true",
     can later be applied publish the changeset.
     """
-    published: Boolean!
+    published: PublishedTriple!
 }
 
 """

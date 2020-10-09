@@ -92,6 +92,8 @@
 // 1528395728_lsif_index_configuration.up.sql (204B)
 // 1528395729_add_external_services_namespace_user_id_index.down.sql (69B)
 // 1528395729_add_external_services_namespace_user_id_index.up.sql (113B)
+// 1528395730_add_changeset_draft_column.down.sql (69B)
+// 1528395730_add_changeset_draft_column.up.sql (100B)
 
 package migrations
 
@@ -2000,6 +2002,46 @@ func _1528395729_add_external_services_namespace_user_id_indexUpSql() (*asset, e
 	return a, nil
 }
 
+var __1528395730_add_changeset_draft_columnDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x72\x75\xf7\xf4\xb3\xe6\xe2\x72\xf4\x09\x71\x0d\x52\x08\x71\x74\xf2\x71\x55\x48\xce\x48\xcc\x4b\x4f\x2d\x4e\x2d\x29\x56\x70\x09\xf2\x0f\x50\x70\xf6\xf7\x09\xf5\xf5\x53\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\x48\x29\x4a\x4c\x2b\xb1\xe6\xe2\x72\xf6\xf7\xf5\xf5\x0c\xb1\xe6\x02\x04\x00\x00\xff\xff\xdd\x94\xf0\xfb\x45\x00\x00\x00")
+
+func _1528395730_add_changeset_draft_columnDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__1528395730_add_changeset_draft_columnDownSql,
+		"1528395730_add_changeset_draft_column.down.sql",
+	)
+}
+
+func _1528395730_add_changeset_draft_columnDownSql() (*asset, error) {
+	bytes, err := _1528395730_add_changeset_draft_columnDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "1528395730_add_changeset_draft_column.down.sql", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xe, 0x62, 0xb3, 0x57, 0x4e, 0x8f, 0xc, 0x1c, 0x16, 0x81, 0x28, 0x12, 0x12, 0xf6, 0xc, 0xc8, 0x3, 0x54, 0x3d, 0x28, 0xa1, 0xec, 0x16, 0xa3, 0xf9, 0xad, 0xe1, 0xb0, 0x83, 0x34, 0xd8, 0xea}}
+	return a, nil
+}
+
+var __1528395730_add_changeset_draft_columnUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x1c\xca\xc1\x0a\xc2\x30\x0c\x06\xe0\x7b\x9e\xe2\x7f\x8f\x9e\xba\x35\x93\x40\x9a\x82\x4b\xc1\x6b\xd5\x4e\x0f\xc3\x81\xdd\xfb\x23\x78\xff\x26\xbe\x88\x05\xa2\xa8\xce\x57\x78\x9c\x94\xf1\x78\xb7\xcf\xab\x8f\x7e\x0e\xc4\x94\x30\x17\xad\xd9\x20\x0b\xac\x38\xf8\x26\xab\xaf\x78\x7e\xdb\x76\xe2\x7e\x1c\x3b\x12\x2f\xb1\xaa\x63\x6b\xfb\xe8\x7f\x63\x55\x35\x10\xcd\x25\x67\xf1\x40\xbf\x00\x00\x00\xff\xff\x3e\x23\x51\xc9\x64\x00\x00\x00")
+
+func _1528395730_add_changeset_draft_columnUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__1528395730_add_changeset_draft_columnUpSql,
+		"1528395730_add_changeset_draft_column.up.sql",
+	)
+}
+
+func _1528395730_add_changeset_draft_columnUpSql() (*asset, error) {
+	bytes, err := _1528395730_add_changeset_draft_columnUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "1528395730_add_changeset_draft_column.up.sql", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xc, 0x74, 0xdc, 0x2a, 0x5c, 0x37, 0x5a, 0x4, 0x5f, 0x28, 0x4, 0xf2, 0x4c, 0x2e, 0x50, 0x55, 0x4f, 0x39, 0x32, 0x3b, 0xda, 0xab, 0x9a, 0x7, 0xf3, 0x42, 0x8c, 0xa2, 0x9e, 0x56, 0xcb, 0x1b}}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -2183,6 +2225,8 @@ var _bindata = map[string]func() (*asset, error){
 	"1528395728_lsif_index_configuration.up.sql":                                   _1528395728_lsif_index_configurationUpSql,
 	"1528395729_add_external_services_namespace_user_id_index.down.sql":            _1528395729_add_external_services_namespace_user_id_indexDownSql,
 	"1528395729_add_external_services_namespace_user_id_index.up.sql":              _1528395729_add_external_services_namespace_user_id_indexUpSql,
+	"1528395730_add_changeset_draft_column.down.sql":                               _1528395730_add_changeset_draft_columnDownSql,
+	"1528395730_add_changeset_draft_column.up.sql":                                 _1528395730_add_changeset_draft_columnUpSql,
 }
 
 // AssetDebug is true if the assets were built with the debug flag enabled.
@@ -2321,6 +2365,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"1528395728_lsif_index_configuration.up.sql":                                   {_1528395728_lsif_index_configurationUpSql, map[string]*bintree{}},
 	"1528395729_add_external_services_namespace_user_id_index.down.sql":            {_1528395729_add_external_services_namespace_user_id_indexDownSql, map[string]*bintree{}},
 	"1528395729_add_external_services_namespace_user_id_index.up.sql":              {_1528395729_add_external_services_namespace_user_id_indexUpSql, map[string]*bintree{}},
+	"1528395730_add_changeset_draft_column.down.sql":                               {_1528395730_add_changeset_draft_columnDownSql, map[string]*bintree{}},
+	"1528395730_add_changeset_draft_column.up.sql":                                 {_1528395730_add_changeset_draft_columnUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory.
