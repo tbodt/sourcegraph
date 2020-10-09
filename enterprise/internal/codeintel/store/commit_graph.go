@@ -92,6 +92,50 @@ func calculateVisibleUploads(graph map[string][]string, uploads map[string][]Upl
 	return forwardUploads, nil
 }
 
+// TODO - reflow all of this
+
+// calculateVisibleUploads transforms the given commit graph and the set of LSIF uploads
+// defined on each commit with LSIF upload into a map from a commit to the set of uploads
+// which are visible from that commit.
+func calculateVisibleUploads2(graph map[string][]string, uploads map[string][]UploadMeta) (map[string][]UploadMeta, error) {
+	// Calculate an ordering of vertices so that all children come before parents.
+	// Iterating this order will walk you "up" the commit graph.
+	ordering, err := topologicalSort(graph)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create two distinct mappings commits to the set of visible uploads populated at
+	// first with only the uploads that the commit defines. We will then "push" these
+	// uploads up to ancestors and down to descendants by traversing twice.
+	forwardUploads := map[string][]UploadMeta{}
+	for commit := range graph {
+		for _, uploadMeta := range uploads[commit] {
+			forwardUploads[commit] = append(forwardUploads[commit], uploadMeta)
+		}
+	}
+
+	// TODO - is this backwards?
+
+	// Forward direction:
+	// Iterate the vertices in topological order (children before parents) and push the
+	// set of visible uploads "down" the tree. Each upload a vertex can see is the set of
+	// uploads its parents can see with an increased distance. If two parents can see an
+	// upload for the same root and indexer, we keep only the one with the minimum distance.
+	for _, commit := range ordering {
+		uploads := forwardUploads[commit]
+		for _, parent := range graph[commit] {
+			for _, upload := range forwardUploads[parent] {
+				uploads = addUploadMeta(uploads, upload.UploadID, upload.Root, upload.Indexer, upload.Distance+1)
+			}
+		}
+
+		forwardUploads[commit] = uploads
+	}
+
+	return forwardUploads, nil
+}
+
 // addUploadMeta adds the given upload metadata to the given list. If there already exists an upload
 // with the same root and indexer, then that upload will be replaced if it has a greater distance.
 // The list is returned unmodified if such an upload has a smaller distance.
