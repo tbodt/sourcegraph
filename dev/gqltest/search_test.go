@@ -692,4 +692,62 @@ func TestSearch(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("And/Or search expression queries", func(t *testing.T) {
+		tests := []struct {
+			name       string
+			query      string
+			zeroResult bool
+			wantAlert  *gqltestutil.SearchAlert
+		}{
+			{
+				name:  `Or distributive property on content and file`,
+				query: `repo:^github\.com/sgtest/sourcegraph-typescript$ (Fetches OR file:language-server.ts)`,
+			},
+			{
+				name:  `Or distributive property on nested file on content`,
+				query: `repo:^github\.com/sgtest/sourcegraph-typescript$ ((file:^renovate\.json extends) or file:progress.ts createProgressProvider)`,
+			},
+			{
+				name:  `Or distributive property on commit`,
+				query: `repo:^github\.com/sgtest/sourcegraph-typescript$ (type:diff or type:commit) author:felix yarn`,
+			},
+			{
+				name:  `Or distributive property on rev`,
+				query: `repo:^github\.com/sgtest/go-diff$ (rev:garo/lsif-indexing-campaign or rev:test-already-exist-pr) file:README.md`,
+			},
+			// TODO: must show two results
+			{
+				name:  `Or distributive property on rev`,
+				query: `repo:^github\.com/sgtest/go-diff$ (rev:garo/lsif-indexing-campaign or rev:test-already-exist-pr)`,
+			},
+			// TODO
+			{
+				name:  `Or distributive property on repo`,
+				query: `(repo:^github\.com/sourcegraph/zoekt@master or repo:^github\.com/sourcegraph/sourcegraph$@3.18:3.17) indexed repos`,
+			},
+		}
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				results, err := client.SearchFiles(test.query)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if diff := cmp.Diff(test.wantAlert, results.Alert); diff != "" {
+					t.Fatalf("Alert mismatch (-want +got):\n%s", diff)
+				}
+
+				if test.zeroResult {
+					if len(results.Results) > 0 {
+						t.Fatalf("Want zero result but got %d", len(results.Results))
+					}
+				} else {
+					if len(results.Results) == 0 {
+						t.Fatal("Want non-zero results but got 0")
+					}
+				}
+			})
+		}
+	})
 }
