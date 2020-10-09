@@ -67,7 +67,13 @@ func parseParents(pair []string) map[string][]string {
 		}
 
 		parts := strings.Split(line, " ")
-		commits[parts[0]] = parts[1:]
+		commits[parts[0]] = append(commits[parts[0]], parts[1:]...)
+
+		for _, part := range parts[1:] {
+			if _, ok := commits[part]; !ok {
+				commits[part] = []string{}
+			}
+		}
 	}
 
 	return commits
