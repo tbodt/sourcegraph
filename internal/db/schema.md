@@ -630,6 +630,8 @@ Check constraints:
  commit        | text    | not null
  upload_id     | integer | not null
  distance      | integer | not null
+ forward       | boolean | not null
+ overwritten   | boolean | not null
 Indexes:
     "lsif_nearest_uploads_repository_id_commit" btree (repository_id, commit)
 

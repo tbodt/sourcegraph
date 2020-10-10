@@ -52,7 +52,7 @@ func (s *store) HasCommit(ctx context.Context, repositoryID int, commit string) 
 	count, _, err := basestore.ScanFirstInt(s.Store.Query(ctx, sqlf.Sprintf(`
 		SELECT COUNT(*)
 		FROM lsif_nearest_uploads
-		WHERE repository_id = %s and commit = %s
+		WHERE repository_id = %s AND commit = %s AND NOT overwritten
 		LIMIT 1
 	`, repositoryID, commit)))
 
@@ -147,11 +147,13 @@ func (s *store) CalculateVisibleUploads(ctx context.Context, repositoryID int, g
 	for commit, uploads := range visibleUploads {
 		for _, uploadMeta := range uploads {
 			nearestUploadsRows = append(nearestUploadsRows, sqlf.Sprintf(
-				"(%s, %s, %s, %s)",
+				"(%s, %s, %s, %s, %s, %s)",
 				repositoryID,
 				commit,
 				uploadMeta.UploadID,
 				uploadMeta.Distance,
+				uploadMeta.Forward,
+				uploadMeta.Overwritten,
 			))
 		}
 	}
@@ -161,7 +163,7 @@ func (s *store) CalculateVisibleUploads(ctx context.Context, repositoryID int, g
 	// size.
 	for _, batch := range batchQueries(nearestUploadsRows, MaxPostgresNumParameters/4) {
 		if err := tx.Store.Exec(ctx, sqlf.Sprintf(
-			`INSERT INTO lsif_nearest_uploads (repository_id, "commit", upload_id, distance) VALUES %s`,
+			`INSERT INTO lsif_nearest_uploads (repository_id, "commit", upload_id, distance, forward, overwritten) VALUES %s`,
 			sqlf.Join(batch, ","),
 		)); err != nil {
 			return err

@@ -490,9 +490,9 @@ func TestFindClosestDumpsFromGraphFragment(t *testing.T) {
 	testFindClosestDumps(t, store, []FindClosestDumpsTestCase{
 		// {commit: makeCommit(1), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{1}},
 		// {commit: makeCommit(2), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{1}},
-		// {commit: makeCommit(3), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{1}},
+		{commit: makeCommit(3), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{1}},
 		// {commit: makeCommit(5), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{2}},
-		// {commit: makeCommit(6), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{2}},
+		{commit: makeCommit(6), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, anyOfIDs: []int{2}},
 		{commit: makeCommit(4), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, graphFragmentOnly: true, anyOfIDs: []int{1}},
 		{commit: makeCommit(7), file: "file.ts", rootMustEnclosePath: true, graph: graphFragment, graphFragmentOnly: true, anyOfIDs: []int{2}},
 	})
@@ -639,6 +639,7 @@ func testFindClosestDumps(t *testing.T, store Store, testCases []FindClosestDump
 
 func testAnyOf(t *testing.T, dumps []Dump, expectedIDs []int) {
 	if len(dumps) != 1 {
+		fmt.Printf("Dumps: %v\n", dumps)
 		t.Errorf("unexpected nearest dump length. want=%d have=%d", 1, len(dumps))
 		return
 	}

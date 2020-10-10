@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/keegancsmith/sqlf"
@@ -139,7 +138,7 @@ func (s *store) FindClosestDumps(ctx context.Context, repositoryID int, commit, 
 				d.indexer
 			FROM lsif_nearest_uploads u
 			JOIN lsif_dumps_with_repository_name d ON d.id = u.upload_id
-			WHERE u.repository_id = %s AND u.commit = %s AND %s
+			WHERE u.repository_id = %s AND u.commit = %s AND NOT u.overwritten AND %s
 		`, repositoryID, commit, sqlf.Join(conds, " AND ")),
 	))
 }
@@ -156,7 +155,9 @@ func (s *store) FindClosestDumpsFromGraphFragment(ctx context.Context, repositor
 		commits = append(commits, sqlf.Sprintf("%s", commit))
 	}
 
-	// TODO -ok crap we have to do this differently
+	// fmt.Printf("Commits: %v\n", sqlf.Join(commits, ","))
+
+	// TODO - ok crap we have to do this differently
 	// In order for us not to be able to get uncle/aunt uploads
 	// we'll need to store the forward-only direction in this table
 	// as well as the combined ones :(
@@ -165,18 +166,26 @@ func (s *store) FindClosestDumpsFromGraphFragment(ctx context.Context, repositor
 		SELECT nu.upload_id, nu.commit, u.root, u.indexer
 		FROM lsif_nearest_uploads nu
 		JOIN lsif_uploads u ON u.id = nu.upload_id
-		WHERE nu.repository_id = %s AND nu.commit IN (%s)
+		WHERE nu.repository_id = %s AND nu.commit IN (%s) AND NOT nu.forward
 	`, repositoryID, sqlf.Join(commits, ", "))))
 	if err != nil {
 		return nil, err
 	}
 
-	visibleUploads, err := calculateVisibleUploads2(graph, uploadMeta)
+	// fmt.Printf("QQQ\n")
+
+	// for c, x := range uploadMeta {
+	// 	fmt.Printf("> %v\n", c)
+	// 	for _, y := range x {
+	// 		fmt.Printf(">> %v\n", y)
+	// 	}
+	// 	fmt.Printf("\n")
+	// }
+
+	visibleUploads, err := calculateVisibleUploads(graph, uploadMeta)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("> %#v\n", visibleUploads)
 
 	if len(visibleUploads[commit]) == 0 {
 		return nil, nil
