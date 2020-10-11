@@ -50,7 +50,7 @@ All notable changes to Sourcegraph are documented in this file.
 - The explore page (`/explore`) was removed.
 - The sign out page was removed.
 - The unused GraphQL types `DiffSearchResult` and `DeploymentConfiguration` were removed.
-- Aggregate daily, weekly, and monthly latencies (in ms) of code intelligence events (e.g., hover	tooltips) have been removed from pings.
+- Aggregate daily, weekly, and monthly latencies (in ms) of code intelligence events (e.g., hover tooltips) have been removed from pings.
 
 ## 3.20.1
 
